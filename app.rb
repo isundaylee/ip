@@ -19,12 +19,15 @@ class IPApp < Sinatra::Base
 
     begin
       client = DigitalOceanDDNSClient.new(access_token, domain_name)
-      client.set(name, ip)
+      changed = client.set(name, ip)
+
+      return 'Not modified as the IP address has not changed. ' unless changed
+      return "Successfully set #{name}.#{domain_name} to point to #{ip}."
     rescue DigitalOceanDDNSException => e
       return "Exception happened: #{e.message}"
+    rescue => e
+      return "Unexpected exception happened: #{e.message}"
     end
-
-    return "Successfully set #{name}.#{domain_name} to point to #{ip}."
   end
 
   run! if app_file == $PROGRAM_NAME

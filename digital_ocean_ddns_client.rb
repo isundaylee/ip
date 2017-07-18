@@ -1,4 +1,5 @@
 require 'droplet_kit'
+require 'resolv'
 
 class DigitalOceanDDNSException < RuntimeError; end
 
@@ -16,6 +17,8 @@ class DigitalOceanDDNSClient
   end
 
   def set(name, ip)
+    return false if ip == get_current_address(name)
+
     match = find_existing_record(name)
     record = generate_new_record(name, ip)
 
@@ -29,9 +32,21 @@ class DigitalOceanDDNSClient
     rescue DropletKit::Error => e
       raise DigitalOceanDDNSException, e.message
     end
+
+    true
   end
 
   private
+
+  def get_current_address(name)
+    fqdn = "#{name}.#{@domain_name}"
+
+    begin
+      return Resolv.getaddress(fqdn)
+    rescue Resolv::ResolvError
+      return nil
+    end
+  end
 
   def find_existing_record(name)
     records = @client.domain_records.all(for_domain: @domain_name)
