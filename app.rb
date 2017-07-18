@@ -27,5 +27,5 @@ class IPApp < Sinatra::Base
     return "Successfully set #{name}.#{domain_name} to point to #{ip}."
   end
 
-  run! if app_file.zero?
+  run! if app_file == $PROGRAM_NAME
 end
