@@ -5,6 +5,7 @@ class DigitalOceanDDNSException < RuntimeError; end
 class DigitalOceanDDNSClient
   TOKEN_REGEX = /[a-z0-9]{64}/
   DOMAIN_NAME_REGEX = /[a-z0-9A-Z]+\.[a-z0-9A-Z]+/
+  RECORD_TTL = 30
 
   def initialize(token, domain_name)
     raise DigitalOceanDDNSException('Invalid token.') unless token =~ TOKEN_REGEX
@@ -45,7 +46,8 @@ class DigitalOceanDDNSClient
     DropletKit::DomainRecord.new(
       type: 'A',
       name: name,
-      data: ip
+      data: ip,
+      ttl: RECORD_TTL
     )
   end
 end
